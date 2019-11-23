@@ -4,15 +4,24 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 const expressHbs = require('express-handlebars');
 var logger = require('morgan');
+const mongoose = require('mongoose');
+require('dotenv').config();
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
 
 var app = express();
 
 // view engine setup
 app.engine('.hbs', expressHbs({defaultLayout: 'layout', extname: '.hbs'}))
 app.set('view engine', '.hbs');
+
+// Connect to mongodb
+mongoose.connect(process.env.MONGO_DB_PATH, (err)=> {
+  if(err)
+    console.log("Can not connect to mongo db");
+  else
+    console.log('Connect db Success');
+});
 
 app.use(logger('dev'));
 app.use(express.json());
