@@ -8,6 +8,8 @@ var logger = require('morgan');
 const mongoose = require('mongoose');
 const passport = require('passport');
 const flash = require('connect-flash');
+const MongoStore = require('connect-mongo')(session);
+
 require('./config/passport_config');
 require('dotenv').config();
 
@@ -36,7 +38,13 @@ app.use(cookieParser());
 app.use(session({
   secret: 'mysecert',
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
+  store: new MongoStore({
+    mongooseConnection: mongoose.connection
+  }),
+  cookie: {
+    maxAge: 180 * 60 * 1000
+  }
 }));
 app.use(flash());
 app.use(passport.initialize());
@@ -46,6 +54,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Set logged in user flage
 app.use((req, res, next) => {
   res.locals.loggedIn = req.isAuthenticated();
+  res.locals.session = req.session;
   next();
 });
 
