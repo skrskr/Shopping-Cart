@@ -3,30 +3,28 @@ const csrf = require('csurf');
 const passport = require('passport');
 const { check, validationResult } = require('express-validator');
 var router = express.Router();
-const csrfProtection = csrf();
-const Product = require('../models/product_model');
 
+const csrfProtection = csrf();
 router.use(csrfProtection)
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  
-  Product.find((err, products) => {
-    let productChuncks = [];
-    const CHUNK_SIZE = 3;
 
-    for(let i = 0; i < products.length; i+= CHUNK_SIZE){
-      productChuncks.push(products.slice(i, i + CHUNK_SIZE));
-    }
-    res.render('shop/index', { title: 'Shoping Cart', products: productChuncks });
-  });
+router.get('/profile', isLoggedIn, (req, res, next) => {
+    res.render('user/profile')
 });
-router.get('/user/signin', (req, res, next) => {
+
+router.get('/logout', isLoggedIn, (req, res, next) => {
+    req.logout();
+    res.redirect('/');
+});
+
+router.use('/', notLoggedIn);
+
+router.get('/signin', (req, res, next) => {
   const messages = req.flash('error');
   res.render('user/signin', {csrfToken: req.csrfToken(), messages: messages, hasError: messages.length > 0});
 })
 
-router.post('/user/signin', [
+router.post('/signin', [
   check('email').notEmpty().withMessage('Invalid Email'),
   check('password').notEmpty().withMessage('Invalid Password'),
 ],
@@ -47,12 +45,12 @@ passport.authenticate('local.signin', {
   failureFlash: true
 }));
 
-router.get('/user/signup', (req, res, next) => {
+router.get('/signup', (req, res, next) => {
   const messages = req.flash('error');
   res.render('user/signup', {csrfToken: req.csrfToken(), messages: messages, hasError: messages.length > 0});
 })
 
-router.post('/user/signup', [
+router.post('/signup', [
   check('email').isEmail().withMessage('Invalid Email'),
   check('password').isLength({min: 4}).withMessage('Invalid Password'),
 ],
@@ -73,8 +71,19 @@ passport.authenticate('local.signup', {
   failureFlash: true
 }));
 
-router.get('/user/profile', (req, res, next) => {
-  res.render('user/profile')
-})
 
 module.exports = router;
+
+function isLoggedIn(req, res, next) {
+    if(req.isAuthenticated())
+        return next();
+    
+    res.redirect('/');
+}
+
+function notLoggedIn(req, res, next) {
+    if(!req.isAuthenticated())
+        return next();
+    
+    res.redirect('/');
+}

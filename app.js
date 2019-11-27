@@ -11,7 +11,8 @@ const flash = require('connect-flash');
 require('./config/passport_config');
 require('dotenv').config();
 
-var indexRouter = require('./routes/index');
+const indexRouter = require('./routes/index_route');
+const userRouter = require('./routes/user_route');
 
 var app = express();
 
@@ -42,7 +43,14 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Set logged in user flage
+app.use((req, res, next) => {
+  res.locals.loggedIn = req.isAuthenticated();
+  next();
+});
+
 app.use('/', indexRouter);
+app.use('/user', userRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
