@@ -6,6 +6,9 @@ const expressHbs = require('express-handlebars');
 const session = require('express-session');
 var logger = require('morgan');
 const mongoose = require('mongoose');
+const passport = require('passport');
+const flash = require('connect-flash');
+require('./config/passport_config');
 require('dotenv').config();
 
 var indexRouter = require('./routes/index');
@@ -34,6 +37,9 @@ app.use(session({
   resave: false,
   saveUninitialized: false
 }));
+app.use(flash());
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
