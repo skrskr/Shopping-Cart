@@ -1,6 +1,7 @@
 var express = require('express');
 const csrf = require('csurf');
 const passport = require('passport');
+const { check, validationResult } = require('express-validator');
 var router = express.Router();
 const csrfProtection = csrf();
 const Product = require('../models/product_model');
@@ -26,7 +27,22 @@ router.get('/user/signup', (req, res, next) => {
   res.render('user/signup', {csrfToken: req.csrfToken(), messages: messages, hasError: messages.length > 0});
 })
 
-router.post('/user/signup', passport.authenticate('local.signup', {
+router.post('/user/signup', [
+  check('email').isEmail().withMessage('Invalid Email'),
+  check('password').isLength({min: 4}).withMessage('Invalid Password'),
+],
+  (req, res, next)=> {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()) {
+        let messages = [];        
+        errors.errors.forEach(err => {
+            messages.push(err.msg);
+        })
+        return res.render('user/signup',{messages: messages, hasError: messages.length > 0});
+    }
+    next();
+  },
+passport.authenticate('local.signup', {
   successRedirect: '/user/profile',
   failureRedirect: '/user/signup',
   failureFlash: true
