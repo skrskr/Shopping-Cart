@@ -21,6 +21,31 @@ router.get('/', function(req, res, next) {
     res.render('shop/index', { title: 'Shoping Cart', products: productChuncks });
   });
 });
+router.get('/user/signin', (req, res, next) => {
+  const messages = req.flash('error');
+  res.render('user/signin', {csrfToken: req.csrfToken(), messages: messages, hasError: messages.length > 0});
+})
+
+router.post('/user/signin', [
+  check('email').notEmpty().withMessage('Invalid Email'),
+  check('password').notEmpty().withMessage('Invalid Password'),
+],
+  (req, res, next)=> {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()) {
+        let messages = [];        
+        errors.errors.forEach(err => {
+            messages.push(err.msg);
+        })
+        return res.render('user/signin',{messages: messages, hasError: messages.length > 0});
+    }
+    next();
+  },
+passport.authenticate('local.signin', {
+  successRedirect: '/user/profile',
+  failureRedirect: '/user/signin',
+  failureFlash: true
+}));
 
 router.get('/user/signup', (req, res, next) => {
   const messages = req.flash('error');

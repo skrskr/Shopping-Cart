@@ -12,24 +12,31 @@ passport.deserializeUser((id, done) => {
     });
 })
 
+// Sign In middleware
+passport.use('local.signin', new LocalStrategy({
+    usernameField: 'email',
+    passwordField: 'password',
+    passReqToCallback: true
+}, function (req, email, password, done) {
+    User.findOne({'email': email}, function (err, user) {
+        if(err)
+            return done(err);
+        if(!user)
+            return done(null, false, {message: "Email not found"})
+        
+        if(!user.validatePassword(password))
+            return done(null, false, {message: "Password invalid"});
+        
+        return done(null, user);
+    })
+}));
+
+// Sign Up middleware
 passport.use('local.signup', new LocalStrategy({
     usernameField: 'email',
     passwordField: 'password',
     passReqToCallback: true
 }, function (req, email, password, done) {
-    // check('email', 'Invalid Email').notEmpty().isEmail();
-    // check('password', 'Invalid Password').notEmpty().isLength({min: 4});
-    // const errors = validationResult(req);
-    // console.log(req);
-    
-    // if(errors.errors.length) {
-    //     let messages = [];
-        
-    //     for(let i = 0; i < errors.errors.length; i++){
-    //         messages.push(errors[i].msg);
-    //     }
-    //     return done(null, false, req.flash('error', messages));
-    // }
     User.findOne({'email': email}, function (err, user) {
         if(err)
             return done(err);
@@ -47,4 +54,4 @@ passport.use('local.signup', new LocalStrategy({
             return done(null, newUser)
         })
     })
-}))
+}));
