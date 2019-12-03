@@ -1,22 +1,21 @@
-
 {{#each products}}
-    <div class="row">
-        {{#each this}}
-        <div class="col-sm-6  col-md-4">
-            <div class="card" style="width: 18rem;">
-                <img src="{{this.imagePath}}" class="card-img-top img-responsive" alt="Gophic Game">
-                <div class="card-body">
-                    <h5 class="card-title">{{this.title}}</h5>
-                    <p class="card-text">{{this.description}}</p>
+<div class="row">
+    {{#each this}}
+    <div class="col-sm-6  col-md-4">
+        <div class="card" style="width: 18rem;">
+            <img src="{{this.imagePath}}" class="card-img-top img-responsive" alt="Gophic Game">
+            <div class="card-body">
+                <h5 class="card-title">{{this.title}}</h5>
+                <p class="card-text">{{this.description}}</p>
+                <div>
+                    <div class="price pull-left">${{this.price}}</div>
                     <div>
-                        <div class="price pull-left">${{this.price}}</div>
-                        <div>
-                            <a href="/add-to-cart/{{this._id}}" class="btn btn-primary pull-right">Add to Cart</a>
-                        </div>
+                        <a href="/add-to-cart/{{this._id}}" class="btn btn-primary pull-right">Add to Cart</a>
                     </div>
                 </div>
             </div>
         </div>
-        {{/each}}
     </div>
+    {{/each}}
+</div>
 {{/each}}
