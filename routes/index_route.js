@@ -3,6 +3,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECERT_KEY);
 var router = express.Router();
 const Product = require("../models/product_model");
 const Cart = require("../models/cart_model");
+const Order = require("../models/order_model");
 
 /* GET home page. */
 router.get("/", function(req, res, next) {
@@ -153,10 +154,21 @@ router.post("/checkout", (req, res, next) => {
         return res.send({ code: 500, msg: "Error Message: " + err.message });
         // return res.redirect("shopping-cart");
       }
-      req.flash("success", "Successfully bought products");
-      req.session.cart = null;
-      res.status(200);
-      return res.send({ code: 200, msg: "Successfull added Message" });
+
+      console.log("UserID:", req.user);
+
+      const order = new Order({
+        userId: req.user,
+        cart: cart,
+        paymentId: charge.id
+      });
+
+      order.save(function(err, result) {
+        req.flash("success", "Successfully bought products");
+        req.session.cart = null;
+        res.status(200);
+        return res.send({ code: 200, msg: "Successfull added Message" });
+      });
     }
   );
 });
