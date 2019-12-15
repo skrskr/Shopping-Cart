@@ -14,6 +14,26 @@ module.exports = function Cart(oldCart) {
     this.totalPrice += storedItem.item.price;
   };
 
+  this.reduceByOne = function(id) {
+    let item = this.items[id];
+    item.qty--;
+    item.price = item.item.price * item.qty;
+
+    this.totalQty--;
+    this.totalPrice -= item.item.price;
+
+    if (item.qty <= 0) delete this.items[id];
+  };
+
+  this.removeItem = function(id) {
+    let item = this.items[id];
+    item.price = item.item.price * item.qty;
+
+    this.totalQty -= item.qty;
+    this.totalPrice -= item.price;
+    delete this.items[id];
+  };
+
   this.generateArray = function() {
     let arr = [];
     for (let id in this.items) arr.push(this.items[id]);

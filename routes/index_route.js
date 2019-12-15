@@ -8,8 +8,6 @@ const Order = require("../models/order_model");
 /* GET home page. */
 router.get("/", function(req, res, next) {
   const successMsg = req.flash("success")[0];
-  // console.log("Success Message", successMsg);
-  // console.log(!successMsg);
 
   Product.find((err, products) => {
     if (err) console.log("Products ERR: ", err);
@@ -40,9 +38,24 @@ router.get("/add-to-cart/:id", (req, res, next) => {
     let cart = new Cart(req.session.cart ? req.session.cart : {});
     cart.add(product, id);
     req.session.cart = cart;
-    console.log(req.session.cart);
     res.redirect("/");
   });
+});
+
+router.get("/reduce/:id", (req, res, next) => {
+  const id = req.params.id;
+  const cart = new Cart(req.session.cart ? req.session.cart : {});
+  cart.reduceByOne(id);
+  req.session.cart = cart;
+  res.redirect("/shopping-cart");
+});
+
+router.get("/remove/:id", (req, res, next) => {
+  const id = req.params.id;
+  const cart = new Cart(req.session.cart ? req.session.cart : {});
+  cart.removeItem(id);
+  req.session.cart = cart;
+  res.redirect("/shopping-cart");
 });
 
 router.get("/shopping-cart", (req, res, next) => {
@@ -87,8 +100,6 @@ router.post("/checkout", isLoggedIn, (req, res, next) => {
         return res.send({ code: 500, msg: "Error Message: " + err.message });
         // return res.redirect("shopping-cart");
       }
-
-      console.log("UserID:", req.user);
 
       const order = new Order({
         userId: req.user,
