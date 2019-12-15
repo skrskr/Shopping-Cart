@@ -4,11 +4,28 @@ const passport = require("passport");
 const { check, validationResult } = require("express-validator");
 var router = express.Router();
 
+const Order = require("../models/order_model");
+const Cart = require("../models/cart_model");
+
 const csrfProtection = csrf();
 router.use(csrfProtection);
 
 router.get("/profile", isLoggedIn, (req, res, next) => {
-  res.render("user/profile");
+  Order.find(
+    {
+      userId: req.user
+    },
+    function(err, orders) {
+      if (err) return res.write("ERROR While reading orders");
+
+      let cart;
+      orders.forEach(function(order) {
+        cart = new Cart(order.cart);
+        order.items = cart.generateArray();
+      });
+      res.render("user/profile", { orders: orders });
+    }
+  );
 });
 
 router.get("/logout", isLoggedIn, (req, res, next) => {
